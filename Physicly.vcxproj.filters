@@ -15,7 +15,13 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Physicly.cpp">
+    <ClCompile Include="src/**">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src/**">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="include\cyclone\particle.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

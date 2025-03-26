@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cyclone/precision.h>
+
 namespace cyclone {
 
 	/**
@@ -106,6 +108,13 @@ namespace cyclone {
 			);
 		}
 
+		void clear()
+		{
+			x *= 0;
+			y *= 0;
+			z *= 0;
+		}
+
 		/** Operators overloads. */
 
 		void operator*=(const real value)
@@ -122,7 +131,7 @@ namespace cyclone {
 
 		real operator *(const Vector3& vector) const
 		{
-			return x*vector.x + y*vector.y + z*vector.z:
+			return x * vector.x + y * vector.y + z * vector.z;
 		}
 
 		void operator +=(const Vector3 &other)

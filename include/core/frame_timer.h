@@ -8,7 +8,7 @@ namespace core {
 	{
 	public:
 		FrameTimer() : previousTime_(std::chrono::high_resolution_clock::now()),
-			deltaTime_(0.0);
+			deltaTime_(0.0) {}
 
 		void update();
 
