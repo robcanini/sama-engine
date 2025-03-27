@@ -1,9 +1,9 @@
 #pragma once
 
-#include <cyclone/core.h>
-#include <cyclone/precision.h>
+#include <physics/core.h>
+#include <physics/precision.h>
 
-namespace cyclone {
+namespace physics {
 
 	/**
 	 * A particle is the simplest object that can be simulated in the
@@ -45,6 +45,27 @@ namespace cyclone {
 				value = (real)0.00000000001;
 			}
 			inverseMass = 1 / value;
+		}
+
+		void setVelocity(real x, real y, real z)
+		{
+			velocity.x = x;
+			velocity.y = y;
+			velocity.z = z;
+		}
+
+		void setAcceleration(real x, real y, real z)
+		{
+			acceleration.x = x;
+			acceleration.y = y;
+			acceleration.z = z;
+		}
+
+		void setPosition(real x, real y, real z)
+		{
+			position.x = x;
+			position.y = y;
+			position.z = z;
 		}
 
 		/**

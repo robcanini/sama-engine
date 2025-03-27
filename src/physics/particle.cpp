@@ -1,7 +1,9 @@
-#include "cyclone/particle.h"
 #include <assert.h>
 
-using namespace cyclone;
+#include "physics/particle.h"
+
+
+using namespace physics;
 
 void Particle::integrate(real duration)
 {
@@ -14,7 +16,7 @@ void Particle::integrate(real duration)
 	Vector3 resultingAcc = acceleration;
 	resultingAcc.addScaledVector(forceAccum, inverseMass);
 
-	// Update lienar velocity from the acceleration.
+	// Update linear velocity from the acceleration.
 	velocity.addScaledVector(resultingAcc, duration);
 
 	// Impose drag.

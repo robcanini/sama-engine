@@ -8,7 +8,7 @@
 /** Defines the precision of the power operator. */
 #define real_pow powf
 
-namespace cyclone {
+namespace physics {
 
 	/** Defines a real number precision. By default single precision is provided. */
 	typedef float real;

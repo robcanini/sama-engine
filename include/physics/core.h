@@ -1,8 +1,8 @@
 #pragma once
 
-#include <cyclone/precision.h>
+#include <physics/precision.h>
 
-namespace cyclone {
+namespace physics {
 
 	/**
 	 * Holds a vector in 3 dimensions. Four data members are allocated
