@@ -3,6 +3,8 @@
 #include "physics/particle.h"
 #include "core/frame_timer.h"
 
+using namespace core;
+
 namespace physics {
 
 	enum class ShotType
@@ -24,16 +26,16 @@ namespace physics {
 		Particle particle;
 
 		/** The type of the projectile to be spawned and fired. */
-		ShotType type;
+		ShotType type = ShotType::UNUSED;
 
 		/** Projectile creation timestamp. */
-		unsigned startTime;
+		unsigned startTime = 0;
 
 		/** Check if the projectile should be not rendered anymore at the current frame. */
 		bool isNotValid(int maxAge, int zBound) const
 		{
 			return particle.position.y < 0.0f ||
-				startTime + maxAge < core::FrameTimer::get()->lastFrameTimestamp ||
+				startTime + maxAge < FrameTimer::get()->lastFrameTimestamp ||
 				particle.position.z > zBound;
 		}
 	};

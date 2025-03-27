@@ -20,6 +20,8 @@ namespace physics {
 		/** Holds the value along the z axis. */
 		real z;
 
+		static Vector3 GRAVITY;
+
 	private:
 		/** Padding to ensure 4-word alignment. */
 		real pad;

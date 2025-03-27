@@ -1,5 +1,6 @@
 #pragma once
 
+#include <assert.h>
 #include <physics/core.h>
 #include <physics/precision.h>
 
@@ -32,19 +33,26 @@ namespace physics {
 		 */
 		real damping;
 
-		void setInverseMass(real value)
+		void setInverseMass(const real mass)
 		{
-			inverseMass = value;
+			inverseMass = mass;
 		}
 
-		void setMass(real value)
+		void setMass(const real mass)
 		{
-			/** Handle the case where mass is zero. */
-			if (value <= 0)
-			{
-				value = (real)0.00000000001;
-			}
-			inverseMass = 1 / value;
+			assert(mass != 0);
+			inverseMass = ((real)1.0) / mass;
+		}
+
+		real getMass() const
+		{
+			assert(inverseMass != 0);
+			return ((real)1.0) / inverseMass;
+		}
+
+		void getVelocity(Vector3 &velocity) const
+		{
+			velocity = this->velocity;
 		}
 
 		void setVelocity(real x, real y, real z)
@@ -66,6 +74,11 @@ namespace physics {
 			position.x = x;
 			position.y = y;
 			position.z = z;
+		}
+
+		bool hasFiniteMass() const
+		{
+			return inverseMass > 0.0f;
 		}
 
 		/**

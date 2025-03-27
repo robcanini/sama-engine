@@ -70,7 +70,7 @@ struct BallisticDemo
 
 			if (shot.isNotValid(projectileMaxAge, projectileZBound))
 			{
-				std::cout << "Projectile not valid anymore" << '\n';
+				std::cout << "Projectile destroyed / hidden" << '\n';
 				break;
 			}
 
