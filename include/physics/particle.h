@@ -55,6 +55,11 @@ namespace physics {
 			velocity = this->velocity;
 		}
 
+		Vector3 getVelocity() const
+		{
+			return velocity;
+		}
+
 		void setVelocity(real x, real y, real z)
 		{
 			velocity.x = x;
@@ -74,6 +79,16 @@ namespace physics {
 			position.x = x;
 			position.y = y;
 			position.z = z;
+		}
+
+		Vector3 getPosition() const
+		{
+			return position;
+		}
+
+		void getPosition(Vector3 &position) const
+		{
+			position = this->position;
 		}
 
 		bool hasFiniteMass() const
@@ -99,7 +114,7 @@ namespace physics {
 		 * Adds the given force to the particle, to be applied at the next
 		 * iteration only.
 		 */
-		void addForce(const Vector3& force);
+		void addForce(const Vector3 &force);
 
 	protected:
 		/**

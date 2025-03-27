@@ -15,7 +15,7 @@ namespace physics {
 		{
 			if (i->particle == particle && i->fg == fg)
 			{
-				registrations.erase(i);
+				registrations.pop_back();
 				return;
 			}
 		}
