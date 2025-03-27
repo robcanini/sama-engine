@@ -50,6 +50,11 @@ namespace physics {
 			return ((real)1.0) / inverseMass;
 		}
 
+		real getInverseMass() const
+		{
+			return inverseMass;
+		}
+
 		void getVelocity(Vector3 &velocity) const
 		{
 			velocity = this->velocity;
@@ -58,6 +63,13 @@ namespace physics {
 		Vector3 getVelocity() const
 		{
 			return velocity;
+		}
+
+		void setVelocity(Vector3 velocity)
+		{
+			this->velocity.x = velocity.x;
+			this->velocity.y = velocity.y;
+			this->velocity.z = velocity.z;
 		}
 
 		void setVelocity(real x, real y, real z)
@@ -72,6 +84,13 @@ namespace physics {
 			acceleration.x = x;
 			acceleration.y = y;
 			acceleration.z = z;
+		}
+
+		void setPosition(Vector3 position)
+		{
+			this->position.x = position.x;
+			this->position.y = position.y;
+			this->position.z = position.z;
 		}
 
 		void setPosition(real x, real y, real z)
