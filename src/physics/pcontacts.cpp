@@ -33,12 +33,37 @@ namespace physics {
 		// Calculate the new separating velocity.
 		real newSepVelocity = -separatingVelocity * restitution;
 
+		// Check the velocity build-up due to acceleration only.
+		Vector3 accCausedVelocity = particle[0]->getAcceleration();
+		if (particle[1])
+		{
+			accCausedVelocity -= particle[1]->getAcceleration();
+		}
+		real accCausedSepVelocity = accCausedVelocity * contactNormal * duration;
+
+		// If we've got a closing velocity due to acceleration build-up,
+		// remove it from the new separating velocity.
+		if (accCausedSepVelocity < 0)
+		{
+			newSepVelocity += restitution * accCausedSepVelocity;
+
+			// Make sure we haven't removed more than was there to remove.
+			if (newSepVelocity < 0)
+			{
+				newSepVelocity = 0;
+			}
+		}
+
 		real deltaVelocity = newSepVelocity - separatingVelocity;
 
 		// We apply the change in velocity to each object in proportion to
 		// its inverse mass (i.e., those with lower inverse mass [higher
 		// actual mass] get less change in velocity).
 		real totalInverseMass = particle[0]->getInverseMass();
+		if (particle[1])
+		{
+			totalInverseMass += particle[1]->getInverseMass();
+		}
 
 		// If all particles have infinite mass, then impulses have no effect.
 		if (totalInverseMass <= 0) return;
@@ -86,6 +111,31 @@ namespace physics {
 		if (particle[1])
 		{
 			particle[1]->setPosition(particle[1]->getPosition() + movePerIMass * particle[1]->getInverseMass());
+		}
+	}
+
+	void ParticleContactResolver::resolveContacts(ParticleContact *contactArray, unsigned numContacts, real duration)
+	{
+		iterationsUsed = 0;
+		while (iterationsUsed < iterations)
+		{
+			// Find the contact with the largest closing velocity.
+			real max = 0;
+			unsigned maxIndex = numContacts;
+			for (unsigned i = 0; i < numContacts; i++)
+			{
+				real sepVel = contactArray[i].calculateSeparatingVelocity();
+				if (sepVel < max)
+				{
+					max = sepVel;
+					maxIndex = i;
+				}
+			}
+
+			// Resolve this contact.
+			contactArray[maxIndex].resolve(duration);
+
+			iterationsUsed++;
 		}
 	}
 }

@@ -86,6 +86,11 @@ namespace physics {
 			acceleration.z = z;
 		}
 
+		Vector3 getAcceleration() const
+		{
+			return acceleration;
+		}
+
 		void setPosition(Vector3 position)
 		{
 			this->position.x = position.x;

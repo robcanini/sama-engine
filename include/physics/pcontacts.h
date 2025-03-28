@@ -34,7 +34,7 @@ namespace physics {
 		/** Holds the depth of the penetration at the contact. */
 		real penetration;
 		
-	protected:
+	public:
 		/**
 		 * Resolved this contact, for both velocity and interpenetration. 
 		 */
@@ -55,5 +55,35 @@ namespace physics {
 		 * Handles the interpenetration resolution for this contact.
 		 */
 		void resolveInterpenetration(real duration);
+	};
+
+	/**
+	 * The contact resolution routine for particle contacts. One
+	 * resolver instance can be shared for the whole simulation.
+	 */
+	class ParticleContactResolver
+	{
+	protected:
+		/** Holds the number of iterations allowed */
+		unsigned iterations;
+
+		/** 
+		 * This is a performance tracking value - we keep a record
+		 * of the actual number of iterations used.
+		 */
+		unsigned iterationsUsed = 0;
+
+	public:
+		/** Creates a new contact resolver. */
+		ParticleContactResolver(unsigned iterations) : iterations(iterations) {}
+
+		/** Sets the number of iterations that can be used. */
+		void setIterations(unsigned iterations)
+		{
+			this->iterations = iterations;
+		}
+
+		/** Resolves a set of particle contacts for both penetration and velocity. */
+		void resolveContacts(ParticleContact* contactArray, unsigned numContacts, real duration);
 	};
 }
