@@ -26,19 +26,19 @@ namespace physics {
 
 	public:
 		/**
-		* Fills the given contact structure with the contact needed
-		* to keep the link from violating its constraint. The contact
-		* pointer should point to the first available contact in a
-		* contact array, where limit is the maximum number of
-		* contacts in the array that can be written to. The method
-		* returns the number of contacts that have been written. This
-		* format is common to contact-generating functions, but this
-		* class can only generate a single contact, so the
-		* pointer can be a pointer to a single element. The limit
-		* parameter is assumed to be at least one (zero isn’t valid),
-		* and the return value is either 0, if the cable wasn’t
-		* overextended, or one if a contact was needed.
-		*/
+		 * Fills the given contact structure with the contact needed
+		 * to keep the link from violating its constraint. The contact
+		 * pointer should point to the first available contact in a
+		 * contact array, where limit is the maximum number of
+		 * contacts in the array that can be written to. The method
+		 * returns the number of contacts that have been written. This
+		 * format is common to contact-generating functions, but this
+		 * class can only generate a single contact, so the
+		 * pointer can be a pointer to a single element. The limit
+		 * parameter is assumed to be at least one (zero isn’t valid),
+		 * and the return value is either 0, if the cable wasn’t
+		 * overextended, or one if a contact was needed.
+		 */
 		virtual unsigned fillContact(ParticleContact* contact, unsigned limit) const = 0;
 	};
 
