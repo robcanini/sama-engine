@@ -88,5 +88,80 @@
     <ClCompile Include="include/**">
       <Filter>Header Files</Filter>
     </ClCompile>
+    <ClCompile Include="src/**">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src/**">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src/**">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\game_instance.cpp" />
+    <ClCompile Include="src\demos\ballistic.cpp" />
+    <ClCompile Include="src\demos\simple_particle.cpp" />
+    <ClCompile Include="src\main.cpp__" />
+    <ClCompile Include="src\physics\core.cpp" />
+    <ClCompile Include="src\physics\particle.cpp" />
+    <ClCompile Include="src\physics\pcontacts.cpp" />
+    <ClCompile Include="src\physics\pfgen.cpp" />
+    <ClCompile Include="src\physics\pfreg.cpp" />
+    <ClCompile Include="src\physics\plinks.cpp" />
+    <ClCompile Include="src\physics\pworld.cpp" />
+    <ClCompile Include="src\vulkan\mesh_circle.cpp" />
+    <ClCompile Include="src/**">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src/**">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src/**">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src/**">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src/**">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src/**">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src/**">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src/**">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="include/**">
+      <Filter>Header Files</Filter>
+    </ClCompile>
+    <ClCompile Include="include/**">
+      <Filter>Header Files</Filter>
+    </ClCompile>
+    <ClCompile Include="include/**">
+      <Filter>Header Files</Filter>
+    </ClCompile>
+    <ClCompile Include="include/**">
+      <Filter>Header Files</Filter>
+    </ClCompile>
+    <ClCompile Include="include/**">
+      <Filter>Header Files</Filter>
+    </ClCompile>
+    <ClCompile Include="include/**">
+      <Filter>Header Files</Filter>
+    </ClCompile>
+    <ClCompile Include="include/**">
+      <Filter>Header Files</Filter>
+    </ClCompile>
+    <ClCompile Include="include/**">
+      <Filter>Header Files</Filter>
+    </ClCompile>
+    <ClCompile Include="include/**">
+      <Filter>Header Files</Filter>
+    </ClCompile>
+    <ClCompile Include="include/**">
+      <Filter>Header Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
