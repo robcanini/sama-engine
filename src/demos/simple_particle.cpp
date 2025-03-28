@@ -20,7 +20,7 @@ struct SimpleParticleDemo
 
 		Particle particle;
 		particle.position = Vector3(0, 0, 0);
-		particle.setMass(0.1);
+		particle.setMass((real)0.1);
 		particle.damping = (real)0.99;
 
 		// Todo: demo purposes
