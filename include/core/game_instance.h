@@ -23,17 +23,23 @@
 #include <set>
 #include <random>
 #include <chrono>
+#include <thread>
 
 #include "vulkan/common.h"
+
+#include <physics/precision.h>
+#include "physics/core.h"
 #include "physics/particle.h"
-#include <thread>
+#include "physics/pfreg.h"
+#include "physics/pcontacts.h"
+#include "physics/pworld.h"
 
 namespace core {
 
-    const uint32_t WIDTH = 800;
-    const uint32_t HEIGHT = 600;
+    const uint32_t WIDTH = 1440;
+    const uint32_t HEIGHT = 900;
 
-    const uint32_t PARTICLE_COUNT = 10;
+    const uint32_t PARTICLE_COUNT = 5000;
 
     const int MAX_FRAMES_IN_FLIGHT = 2;
 
@@ -85,7 +91,7 @@ namespace core {
         }
 
     private:
-        std::vector<physics::Particle> cpuParticles;
+        // std::vector<physics::Particle> cpuParticles;
 
         GLFWwindow* window;
 
@@ -187,18 +193,20 @@ namespace core {
         {
             const auto frameDuration = std::chrono::duration<double>(1.0 / 60.0); // ~16.6 ms
 
+            physics::ParticleWorld* pWorld = generateWorld();
+
             while (!glfwWindowShouldClose(window))
             {
                 auto frameStart = std::chrono::high_resolution_clock::now();
-
-                glfwPollEvents();
-                physicsFrame();
-                drawFrame();
 
                 // We want to animate the particle system using the last frames time to get smooth, frame-rate independent animation
                 double currentTime = glfwGetTime();
                 lastFrameTime = (currentTime - lastTime) * 1000.0;
                 lastTime = currentTime;
+
+                glfwPollEvents();
+                physicsFrame(lastFrameTime, pWorld);
+                drawFrame();
 
                 auto frameEnd = std::chrono::high_resolution_clock::now();
                 auto elapsed = frameEnd - frameStart;
@@ -209,31 +217,87 @@ namespace core {
                 }
             }
 
+            delete(pWorld);
+
             vkDeviceWaitIdle(device);
         }
 
-        void generateWorld()
+        physics::ParticleWorld* generateWorld()
         {
-            // todo
-        }
+            using namespace physics;
 
-        void physicsFrame()
-        {
-            double currentTime = glfwGetTime();
-            double deltaTime = currentTime - lastTime;
-            lastTime = currentTime;
+            ParticleWorld* pWorld = new ParticleWorld(10);
 
-            updateParticlesCPU(static_cast<float>(deltaTime));
-        }
+            std::default_random_engine rndEngine(static_cast<unsigned>(time(nullptr)));
+            std::uniform_real_distribution<float> rndDist(0.0f, 1.0f);
 
-        void updateParticlesCPU(float deltaTime)
-        {
-            VkDeviceSize bufferSize = sizeof(physics::Particle) * PARTICLE_COUNT;
+            ParticleWorld::ParticleRegistration* head = nullptr;
+            ParticleWorld::ParticleRegistration* tail = nullptr;
 
-            for (auto& particle : cpuParticles)
+            for (int i = 0; i < PARTICLE_COUNT; i++)
             {
-                particle.integrate(deltaTime);
+                float r = 0.25f * sqrt(rndDist(rndEngine));
+                float theta = rndDist(rndEngine) * 2.0f * 3.14159265358979323846f;
+                float x = r * cos(theta) * HEIGHT / WIDTH;
+                float y = r * sin(theta);
+
+                Particle* particle = new Particle();
+                particle->position = Vector3(x, y, 0);
+                particle->velocity = Vector3(rndDist(rndEngine), rndDist(rndEngine), rndDist(rndEngine));
+                particle->color = Vector3(rndDist(rndEngine), rndDist(rndEngine), rndDist(rndEngine));
+                particle->acceleration = Vector3(0.0f, 0.0f, 0.0f);
+                particle->damping = std::min(rndDist(rndEngine), 1.0f);
+                particle->setMass(1.0f);
+
+                ParticleWorld::ParticleRegistration* node = new ParticleWorld::ParticleRegistration();
+                node->particle = particle;
+                node->next = nullptr;
+
+                if (!head)
+                {
+                    head = tail = node;
+                }
+                else
+                {
+                    tail->next = node;
+                    tail = node;
+                }
             }
+
+            pWorld->firstParticle = head;
+
+            return pWorld;
+        }
+
+        void physicsFrame(double lastFrameTimeSeconds, physics::ParticleWorld* pWorld)
+        {
+            float deltaTime = static_cast<float>(lastFrameTimeSeconds / 1000);
+
+            pWorld->integrate(deltaTime);
+
+            updateParticlesCPU(pWorld);
+        }
+
+        void updateParticlesCPU(physics::ParticleWorld* pWorld)
+        {
+            using namespace physics;
+
+            std::vector<Particle> particlesVector = {};
+
+            ParticleWorld::ParticleRegistration* current = pWorld->firstParticle;
+
+            while (current)
+            {
+                // current->particle->integrate(deltaTime);
+
+                ParticleWorld::ParticleRegistration* next = current->next;
+
+                particlesVector.push_back(*current->particle);
+
+                current = next;
+            }
+
+            VkDeviceSize bufferSize = sizeof(Particle) * PARTICLE_COUNT;
 
             VkBuffer stagingBuffer;
             VkDeviceMemory stagingBufferMemory;
@@ -243,7 +307,7 @@ namespace core {
 
             void* data;
             vkMapMemory(device, stagingBufferMemory, 0, bufferSize, 0, &data);
-            memcpy(data, cpuParticles.data(), static_cast<size_t>(bufferSize));
+            memcpy(data, particlesVector.data(), static_cast<size_t>(bufferSize));
             vkUnmapMemory(device, stagingBufferMemory);
 
             copyBuffer(stagingBuffer, shaderStorageBuffers[currentFrame], bufferSize);
@@ -613,7 +677,6 @@ namespace core {
             }
         }
 
-
         void createGraphicsPipeline() {
             auto vertShaderCode = readFile("shaders/vert.spv");
             auto fragShaderCode = readFile("shaders/frag.spv");
@@ -808,22 +871,8 @@ namespace core {
             std::default_random_engine rndEngine((unsigned)time(nullptr));
             std::uniform_real_distribution<float> rndDist(0.0f, 1.0f);
 
+            std::vector<physics::Particle> cpuParticles;
             cpuParticles.resize(PARTICLE_COUNT);
-
-            // Initial particle positions on a circle
-            for (auto& particle : cpuParticles)
-            {
-                float r = 0.25f * sqrt(rndDist(rndEngine));
-                float theta = rndDist(rndEngine) * 2.0f * 3.14159265358979323846f;
-                float x = r * cos(theta) * HEIGHT / WIDTH;
-                float y = r * sin(theta);
-                particle.position = physics::Vector3(x, y, 0);
-                particle.velocity = physics::Vector3(rndDist(rndEngine), rndDist(rndEngine), rndDist(rndEngine));
-                particle.color = physics::Vector3(rndDist(rndEngine), rndDist(rndEngine), rndDist(rndEngine));
-                particle.acceleration = physics::Vector3(0.0f, 0.0f, 0.0f);
-                particle.damping = fmin(rndDist(rndEngine), 1);
-                particle.setMass(1.0f);
-            }
 
             VkDeviceSize bufferSize = sizeof(physics::Particle) * PARTICLE_COUNT;
 
@@ -832,9 +881,9 @@ namespace core {
             VkDeviceMemory stagingBufferMemory;
             createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingBufferMemory);
 
-            void* data;
-            vkMapMemory(device, stagingBufferMemory, 0, bufferSize, 0, &data);
-            memcpy(data, cpuParticles.data(), (size_t)bufferSize);
+            // void* data;
+            // vkMapMemory(device, stagingBufferMemory, 0, bufferSize, 0, &data);
+            // memcpy(data, cpuParticles.data(), (size_t)bufferSize);
             vkUnmapMemory(device, stagingBufferMemory);
 
             shaderStorageBuffers.resize(MAX_FRAMES_IN_FLIGHT);
@@ -848,7 +897,6 @@ namespace core {
 
             vkDestroyBuffer(device, stagingBuffer, nullptr);
             vkFreeMemory(device, stagingBufferMemory, nullptr);
-
         }
 
         void createUniformBuffers() {
@@ -941,7 +989,6 @@ namespace core {
                 vkUpdateDescriptorSets(device, 3, descriptorWrites.data(), 0, nullptr);
             }
         }
-
 
         void createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& bufferMemory) {
             VkBufferCreateInfo bufferInfo{};

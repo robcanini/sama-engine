@@ -20,8 +20,5 @@
 /** Defines the precision of the exponent operator. */
 #define real_exp expf
 
-namespace physics {
-
-	/** Defines a real number precision. By default single precision is provided. */
-	typedef float real;
-}
+/** Defines a real number precision. By default single precision is provided. */
+typedef float real;

@@ -65,6 +65,45 @@ namespace physics {
 			calculateIterations = iterations == 0;
 		}
 
+		~ParticleWorld()
+		{
+			ParticleRegistration* current = firstParticle;
+
+			while (current)
+			{
+				ParticleRegistration* next = current->next;
+
+				// Libera la particella associata
+				delete current->particle;
+
+				// Libera il nodo della linked list
+				delete current;
+
+				current = next;
+			}
+
+			firstParticle = nullptr;
+
+			// (Opzionale) Se hai una linked list di ContactGenRegistration, liberala qui:
+			ContactGenRegistration* currentGen = firstContactGen;
+
+			while (currentGen)
+			{
+				ContactGenRegistration* nextGen = currentGen->next;
+
+				delete currentGen->gen;   // Solo se tu sei il proprietario del generatore
+				delete currentGen;
+
+				currentGen = nextGen;
+			}
+
+			firstContactGen = nullptr;
+
+			// (Opzionale) Se `contacts` è un array allocato con `new[]`, liberalo:
+			delete[] contacts;
+			contacts = nullptr;
+		}
+
 		/**
 		 * Initializes the world for a simulation frame. This clears
 		 * the force accumulators for particles in the world. After
@@ -83,7 +122,18 @@ namespace physics {
 		 * Integrates all the particles in this world forward in time
 		 * by the given duration.
 		 */
-		void integrate(real duration);
+		void integrate(float duration)
+		{
+			ParticleRegistration* reg = firstParticle;
+			while (reg)
+			{
+				// Integrate the particle for the frame duration.
+				reg->particle->integrate(static_cast<real>(duration));
+
+				// Get the next registration.
+				reg = reg->next;
+			}
+		}
 
 		/**
 		 * Processes all the physics for the particle world.
