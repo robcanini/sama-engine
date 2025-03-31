@@ -162,6 +162,11 @@
     <ClCompile Include="src/**" />
     <ClCompile Include="include/**" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="shaders\comp.spv" />
+    <None Include="shaders\frag.spv" />
+    <None Include="shaders\vert.spv" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

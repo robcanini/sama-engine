@@ -33,6 +33,8 @@ namespace physics {
 		 */
 		real damping;
 
+		Vector3 color;
+
 		void setInverseMass(const real mass)
 		{
 			inverseMass = mass;
