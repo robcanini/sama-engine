@@ -84,14 +84,13 @@ namespace physics {
 
 			firstParticle = nullptr;
 
-			// (Opzionale) Se hai una linked list di ContactGenRegistration, liberala qui:
 			ContactGenRegistration* currentGen = firstContactGen;
 
 			while (currentGen)
 			{
 				ContactGenRegistration* nextGen = currentGen->next;
 
-				delete currentGen->gen;   // Solo se tu sei il proprietario del generatore
+				delete currentGen->gen;
 				delete currentGen;
 
 				currentGen = nextGen;
@@ -99,7 +98,6 @@ namespace physics {
 
 			firstContactGen = nullptr;
 
-			// (Opzionale) Se `contacts` è un array allocato con `new[]`, liberalo:
 			delete[] contacts;
 			contacts = nullptr;
 		}
@@ -122,18 +120,7 @@ namespace physics {
 		 * Integrates all the particles in this world forward in time
 		 * by the given duration.
 		 */
-		void integrate(float duration)
-		{
-			ParticleRegistration* reg = firstParticle;
-			while (reg)
-			{
-				// Integrate the particle for the frame duration.
-				reg->particle->integrate(static_cast<real>(duration));
-
-				// Get the next registration.
-				reg = reg->next;
-			}
-		}
+		void integrate(float duration);
 
 		/**
 		 * Processes all the physics for the particle world.

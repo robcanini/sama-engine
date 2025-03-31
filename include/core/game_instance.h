@@ -275,10 +275,10 @@ namespace core {
 
             pWorld->integrate(deltaTime);
 
-            updateParticlesCPU(pWorld);
+            updateParticlesOnGPU(pWorld);
         }
 
-        void updateParticlesCPU(physics::ParticleWorld* pWorld)
+        void updateParticlesOnGPU(physics::ParticleWorld* pWorld)
         {
             using namespace physics;
 
@@ -288,8 +288,6 @@ namespace core {
 
             while (current)
             {
-                // current->particle->integrate(deltaTime);
-
                 ParticleWorld::ParticleRegistration* next = current->next;
 
                 particlesVector.push_back(*current->particle);

@@ -37,6 +37,19 @@ namespace physics {
 		return maxContacts - limit;
 	}
 
+	void ParticleWorld::integrate(float duration)
+	{
+		ParticleRegistration* reg = firstParticle;
+		while (reg)
+		{
+			// Integrate the particle for the frame duration.
+			reg->particle->integrate(static_cast<real>(duration));
+
+			// Get the next registration.
+			reg = reg->next;
+		}
+	}
+
 	void ParticleWorld::runPhysics(real duration)
 	{
 		// First apply the force generators.
