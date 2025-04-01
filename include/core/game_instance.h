@@ -273,7 +273,7 @@ namespace core {
         {
             float deltaTime = static_cast<float>(lastFrameTimeSeconds / 1000);
 
-            pWorld->integrate(deltaTime);
+            pWorld->runPhysics(deltaTime);
 
             updateParticlesOnGPU(pWorld);
         }

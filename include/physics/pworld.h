@@ -23,7 +23,7 @@ namespace physics {
 		};
 
 		/** Holds the list of registrations. */
-		ParticleRegistration* firstParticle;
+		ParticleRegistration* firstParticle = nullptr;
 
 		/** Holds the force generators for the particles in this world. */
 		ParticleForceRegistry registry;
@@ -39,10 +39,10 @@ namespace physics {
 		};
 
 		/** Holds the list of contact generators. */
-		ContactGenRegistration* firstContactGen;
+		ContactGenRegistration* firstContactGen = nullptr;
 
 		/** Holds the list of contacts. */
-		ParticleContact* contacts;
+		ParticleContact* contacts = nullptr;
 
 		/** 
 		 * Holds the maximum number of contacts allowed (e.g.: the
