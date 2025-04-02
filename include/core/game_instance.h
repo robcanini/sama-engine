@@ -39,11 +39,7 @@ namespace core {
 
     const uint32_t WIDTH = 800;
     const uint32_t HEIGHT = 600;
-
-    const float HEIGHT_METERS = 0.5f;
-    const float y_bottom = -HEIGHT_METERS / 2.0f;
-
-    const uint32_t PARTICLE_COUNT = 100;
+    const uint32_t PARTICLE_COUNT = 250;
 
     const int MAX_FRAMES_IN_FLIGHT = 2;
 
