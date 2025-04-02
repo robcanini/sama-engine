@@ -112,9 +112,6 @@
     <ClCompile Include="include/**">
       <Filter>Header Files</Filter>
     </ClCompile>
-    <ClCompile Include="include/**">
-      <Filter>Header Files</Filter>
-    </ClCompile>
     <ClCompile Include="src/**">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -576,6 +573,39 @@
     </ClCompile>
     <ClCompile Include="include/**">
       <Filter>Header Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src/**">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src/**">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src/**">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src/**">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src/**">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src/**">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src/**">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src/**">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src/**">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src/**">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src/**">
+      <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src/**">
       <Filter>Source Files</Filter>
@@ -623,6 +653,39 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include/**">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include/**">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include/**">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include/**">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include/**">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include/**">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include/**">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include/**">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include/**">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include/**">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include/**">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="include/**">
       <Filter>Header Files</Filter>
     </ClInclude>

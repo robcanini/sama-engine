@@ -113,6 +113,10 @@ namespace physics {
 		ParticleForceRegistry& getForceRegistry();
 	};
 
+	/**
+	 * Generates the contacts with the ground. It is possible
+	 * to customize the ground level and the restitution.
+	 */
 	class GroundContacts : public ParticleContactGenerator
 	{
 		ParticleWorld::Particles* particles;
@@ -120,8 +124,13 @@ namespace physics {
 	private:
 		real restitution;
 
+		real groundY;
+
 	public:
-		GroundContacts(ParticleWorld::Particles* particles, real restitution = 0.2f) : particles(particles), restitution(restitution)
+		GroundContacts(ParticleWorld::Particles* particles, real groundY = 0.0f, real restitution = 0.2f) 
+			: particles(particles)
+			, groundY(groundY)
+			, restitution(restitution)
 		{
 		}
 

@@ -239,6 +239,7 @@ namespace core {
             std::uniform_real_distribution<float> xDist(0.0f, static_cast<float>(WIDTH));
             std::uniform_real_distribution<float> yDist(0.0f, static_cast<float>(HEIGHT));
             std::uniform_real_distribution<float> rndDist(-1.0f, 1.0f);
+            std::uniform_real_distribution<float> dampingDist(0.500f, 0.999f);
 
             ParticleGravity* pfGravity = new ParticleGravity(Vector3::GRAVITY);
 
@@ -253,7 +254,7 @@ namespace core {
                 particle->velocity = Vector3(0.0f, 0.0f, 0.0f);
                 particle->color = Vector3(rndDist(rndEngine), rndDist(rndEngine), rndDist(rndEngine));
                 particle->acceleration = Vector3(0.0f, 0.0f, 0.0f);
-                particle->damping = 0.99f;
+                particle->damping = dampingDist(rndEngine);
                 particle->setMass(1.0f);
 
                 pWorld->getParticles().push_back(particle);
@@ -261,7 +262,7 @@ namespace core {
 				particles.push_back(particle);
             }
 
-			GroundContacts* groundContactGen = new GroundContacts(&pWorld->getParticles(), 0.65f);
+			GroundContacts* groundContactGen = new GroundContacts(&pWorld->getParticles(), -0.98f, 0.65f);
 			pWorld->getContactGenerators().push_back(groundContactGen);
 
             return pWorld;

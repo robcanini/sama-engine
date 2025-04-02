@@ -89,7 +89,7 @@ namespace physics {
 			p++)
 		{
 			real y = (*p)->getPosition().y;
-			if (y < 0.0f)
+			if (y <= groundY)
 			{
 				Vector3 groundNormal = Vector3::UP;
 				Vector3 velocity = (*p)->getVelocity();
@@ -105,7 +105,7 @@ namespace physics {
 				contact->contactNormal = groundNormal;
 				contact->particle[0] = *p;
 				contact->particle[1] = NULL;
-				contact->penetration = -y;
+				contact->penetration = y - groundY;
 				contact->restitution = finalRestitution;
 				contact++;
 				count++;
