@@ -1,10 +1,12 @@
 #pragma once
 
+#include <vector>
 #include "physics/precision.h"
 #include "physics/core.h"
 #include "physics/particle.h"
 #include "physics/pfreg.h"
 #include "physics/pcontacts.h"
+#include "physics/pcommon.h"
 
 namespace physics {
 
@@ -15,15 +17,15 @@ namespace physics {
 	class ParticleWorld
 	{
 	public:
-		/**  Holds one particle in the linked list of particles. */
-		struct ParticleRegistration
-		{
-			Particle* particle;
-			ParticleRegistration* next;
-		};
+		typedef std::vector<Particle*> Particles;
+		typedef std::vector<ParticleContactGenerator*> ContactGenerators;
 
-		/** Holds the list of registrations. */
-		ParticleRegistration* firstParticle = nullptr;
+	protected:
+
+		/**
+		 * Holds the particles
+		 */
+		Particles particles;
 
 		/** Holds the force generators for the particles in this world. */
 		ParticleForceRegistry registry;
@@ -31,18 +33,13 @@ namespace physics {
 		/** Holds the resolver for contacts. */
 		ParticleContactResolver resolver;
 
-		/** Holds one registered contact generator. */
-		struct ContactGenRegistration
-		{
-			ParticleContactGenerator* gen;
-			ContactGenRegistration* next;
-		};
-
-		/** Holds the list of contact generators. */
-		ContactGenRegistration* firstContactGen = nullptr;
+		/**
+		 * Contact generators.
+		 */
+		ContactGenerators contactGenerators;
 
 		/** Holds the list of contacts. */
-		ParticleContact* contacts = nullptr;
+		ParticleContact* contacts;
 
 		/** 
 		 * Holds the maximum number of contacts allowed (e.g.: the
@@ -50,7 +47,11 @@ namespace physics {
 		 */
 		unsigned maxContacts;
 
-		unsigned iterations;
+		/**
+		 * True if the world should calculate the number of iterations
+		 * to give the contact resolver at each frame.
+		 */
+		bool calculateIterations;
 
 	public:
 		/**
@@ -60,46 +61,15 @@ namespace physics {
 		 * don’t give a number of iterations, then twice the number of
 		 * contacts will be used.
 		 */
-		ParticleWorld(unsigned maxContacts, unsigned iterations = 0) : maxContacts(maxContacts), iterations(iterations)
+		ParticleWorld(unsigned maxContacts, unsigned iterations = 0) : maxContacts(maxContacts), resolver(iterations)
 		{
 			calculateIterations = iterations == 0;
+			contacts = new ParticleContact[maxContacts];
 		}
 
 		~ParticleWorld()
 		{
-			ParticleRegistration* current = firstParticle;
-
-			while (current)
-			{
-				ParticleRegistration* next = current->next;
-
-				// Libera la particella associata
-				delete current->particle;
-
-				// Libera il nodo della linked list
-				delete current;
-
-				current = next;
-			}
-
-			firstParticle = nullptr;
-
-			ContactGenRegistration* currentGen = firstContactGen;
-
-			while (currentGen)
-			{
-				ContactGenRegistration* nextGen = currentGen->next;
-
-				delete currentGen->gen;
-				delete currentGen;
-
-				currentGen = nextGen;
-			}
-
-			firstContactGen = nullptr;
-
 			delete[] contacts;
-			contacts = nullptr;
 		}
 
 		/**
@@ -120,14 +90,43 @@ namespace physics {
 		 * Integrates all the particles in this world forward in time
 		 * by the given duration.
 		 */
-		void integrate(float duration);
+		void integrate(real duration) const;
 
 		/**
 		 * Processes all the physics for the particle world.
 		 */
 		void runPhysics(real duration);
 
-	private:
-		bool calculateIterations;
+		/**
+		 *  Returns the list of particles.
+		 */
+		Particles& getParticles();
+
+		/**
+		 * Returns the list of contact generators.
+		 */
+		ContactGenerators& getContactGenerators();
+
+		/**
+		 * Returns the force registry.
+		 */
+		ParticleForceRegistry& getForceRegistry();
 	};
-}
+
+	class GroundContacts : public ParticleContactGenerator
+	{
+		ParticleWorld::Particles* particles;
+
+	private:
+		real restitution;
+
+	public:
+		GroundContacts(ParticleWorld::Particles* particles, real restitution = 0.2f) : particles(particles), restitution(restitution)
+		{
+		}
+
+	public:
+
+		virtual unsigned addContact(ParticleContact* contact, unsigned limit) const override;
+	};
+} // namespace physics

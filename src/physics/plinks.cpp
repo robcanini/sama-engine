@@ -8,7 +8,7 @@ namespace physics {
 		return relativePos.magnitude();
 	}
 
-	unsigned ParticleCable::fillContact(ParticleContact* contact, unsigned limit) const
+	unsigned ParticleCable::addContact(ParticleContact* contact, unsigned limit) const
 	{
 		// Find the length of the cable.
 		real length = currentLength();
@@ -34,7 +34,7 @@ namespace physics {
 		return 1;
 	}
 
-	unsigned ParticleRod::fillContact(ParticleContact* contact, unsigned limit) const
+	unsigned ParticleRod::addContact(ParticleContact* contact, unsigned limit) const
 	{
 		// Find the length of the rod.
 		real currentLen = currentLength();
@@ -70,4 +70,76 @@ namespace physics {
 
 		return 1;
 	}
+
+	real ParticleConstraint::currentLength() const
+	{
+		Vector3 relativePos = particle->getPosition() - anchor;
+		return relativePos.magnitude();
+	}
+
+	unsigned ParticleCableConstraint::addContact(ParticleContact* contact,
+		unsigned limit) const
+	{
+		// Find the length of the cable
+		real length = currentLength();
+
+		// Check if we're over-extended
+		if (length < maxLength)
+		{
+			return 0;
+		}
+
+		// Otherwise return the contact
+		contact->particle[0] = particle;
+		contact->particle[1] = 0;
+
+		// Calculate the normal
+		Vector3 normal = anchor - particle->getPosition();
+		normal.normalize();
+		contact->contactNormal = normal;
+
+		contact->penetration = length - maxLength;
+		contact->restitution = restitution;
+
+		return 1;
+	}
+
+	unsigned ParticleRodConstraint::addContact(ParticleContact* contact,
+		unsigned limit) const
+	{
+		// Find the length of the rod
+		real currentLen = currentLength();
+
+		// Check if we're over-extended
+		if (currentLen == length)
+		{
+			return 0;
+		}
+
+		// Otherwise return the contact
+		contact->particle[0] = particle;
+		contact->particle[1] = 0;
+
+		Vector3 position = particle->getPosition();
+
+		// Calculate the normal
+		Vector3 normal = anchor - position;
+		normal.normalize();
+
+		// The contact normal depends on whether we're extending or compressing
+		if (currentLen > length) {
+			contact->contactNormal = normal;
+			contact->penetration = currentLen - length;
+		}
+		else {
+			contact->contactNormal = normal * -1;
+			contact->penetration = length - currentLen;
+		}
+
+		// Always use zero restitution (no bounciness)
+		contact->restitution = 0;
+
+		return 1;
+	}
+
 }

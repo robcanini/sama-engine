@@ -20,7 +20,15 @@ namespace physics {
 		/** Holds the value along the z axis. */
 		real z;
 
-		static Vector3 GRAVITY;
+		const static Vector3 GRAVITY;
+		const static Vector3 HIGH_GRAVITY;
+		const static Vector3 UP;
+		const static Vector3 RIGHT;
+		const static Vector3 OUT_OF_SCREEN;
+		const static Vector3 X;
+		const static Vector3 Y;
+		const static Vector3 Z;
+		const static Vector3 ZERO;
 
 	private:
 		/** Padding to ensure 4-word alignment. */
@@ -155,7 +163,7 @@ namespace physics {
 			z -= other.z;
 		}
 
-		Vector3 operator -(const Vector3 &other)
+		Vector3 operator -(const Vector3 &other) const
 		{
 			return Vector3(x - other.x, y - other.y, z - other.z);
 		}

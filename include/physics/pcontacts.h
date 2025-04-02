@@ -3,6 +3,7 @@
 #include "physics/precision.h"
 #include "physics/core.h"
 #include "physics/particle.h"
+#include "physics/pcommon.h"
 
 namespace physics {
 
@@ -18,6 +19,12 @@ namespace physics {
 	 */
 	class ParticleContact {
 
+		/**
+		 * The contact resolver object needs access into the contacts to
+		 * set and effect the contact.
+		 */
+		friend class ParticleContactResolver;
+
 	public:
 		/**
 		 * Holds the particles that are involved in the contact. The
@@ -26,13 +33,19 @@ namespace physics {
 		Particle* particle[2];
 
 		/** Holds the normal restitution coefficient at the contact. */
-		real restitution;
+		real restitution = 0;
 
 		/** Holds the direction of the contact in world coordinates. */
 		Vector3 contactNormal;
 
 		/** Holds the depth of the penetration at the contact. */
 		real penetration;
+
+		/**
+		 * Holds the amount each particle is moved by during interpenetration
+		 * resolution.
+		 */
+		Vector3 particleMovement[2];
 		
 	public:
 		/**
@@ -71,19 +84,14 @@ namespace physics {
 		 * This is a performance tracking value - we keep a record
 		 * of the actual number of iterations used.
 		 */
-		unsigned iterationsUsed = 0;
+		unsigned iterationsUsed;
 
 	public:
-		ParticleContactResolver() {}
-
 		/** Creates a new contact resolver. */
-		ParticleContactResolver(unsigned iterations) : iterations(iterations) {}
+		ParticleContactResolver(unsigned iterations);
 
 		/** Sets the number of iterations that can be used. */
-		void setIterations(unsigned iterations)
-		{
-			this->iterations = iterations;
-		}
+		void setIterations(unsigned iterations);
 
 		/** Resolves a set of particle contacts for both penetration and velocity. */
 		void resolveContacts(ParticleContact* contactArray, unsigned numContacts, real duration);
@@ -106,4 +114,4 @@ namespace physics {
 		 */
 		virtual unsigned addContact(ParticleContact* contact, unsigned limit) const = 0;
 	};
-}
+} // namespace physics

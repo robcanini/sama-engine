@@ -22,3 +22,6 @@
 
 /** Defines a real number precision. By default single precision is provided. */
 typedef float real;
+
+/** Defines the highest value for the real number. */
+#define REAL_MAX FLT_MAX

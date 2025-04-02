@@ -1,17 +1,16 @@
+#include <cstddef>
 #include "physics/pworld.h"
 
 namespace physics {
 
 	void ParticleWorld::startFrame()
 	{
-		ParticleRegistration* reg = firstParticle;
-		while (reg)
+		for (Particles::iterator p = particles.begin();
+			p != particles.end();
+			p++)
 		{
-			// Remove all forces from the accumulator.
-			reg->particle->clearAccumulator();
-
-			// Get the next registration.
-			reg = reg->next;
+			// Remove all forces from the accumulator
+			(*p)->clearAccumulator();
 		}
 	}
 
@@ -20,33 +19,31 @@ namespace physics {
 		unsigned limit = maxContacts;
 		ParticleContact* nextContact = contacts;
 
-		ContactGenRegistration* reg = firstContactGen;
-		while (reg)
+		for (ContactGenerators::iterator g = contactGenerators.begin();
+			g != contactGenerators.end();
+			g++)
 		{
-			unsigned used = reg->gen->addContact(nextContact, limit);
+			unsigned used = (*g)->addContact(nextContact, limit);
 			limit -= used;
 			nextContact += used;
 
-			// We've run out of contacts to fill. This means we're missing contacts.
+			// We've run out of contacts to fill. This means we're missing
+			// contacts.
 			if (limit <= 0) break;
-
-			reg = reg->next;
 		}
 
 		// Return the number of contacts used.
 		return maxContacts - limit;
 	}
 
-	void ParticleWorld::integrate(float duration)
+	void ParticleWorld::integrate(real duration) const
 	{
-		ParticleRegistration* reg = firstParticle;
-		while (reg)
+		for (Particles::const_iterator p = particles.begin();
+			p != particles.end();
+			p++)
 		{
-			// Integrate the particle for the frame duration.
-			reg->particle->integrate(static_cast<real>(duration));
-
-			// Get the next registration.
-			reg = reg->next;
+			// Remove all forces from the accumulator
+			(*p)->integrate(duration);
 		}
 	}
 
@@ -68,4 +65,54 @@ namespace physics {
 		}
 		resolver.resolveContacts(contacts, usedContacts, duration);
 	}
-}
+
+	ParticleWorld::Particles& ParticleWorld::getParticles()
+	{
+		return particles;
+	}
+
+	ParticleWorld::ContactGenerators& ParticleWorld::getContactGenerators()
+	{
+		return contactGenerators;
+	}
+
+	ParticleForceRegistry& ParticleWorld::getForceRegistry()
+	{
+		return registry;
+	}
+
+	unsigned GroundContacts::addContact(ParticleContact* contact, unsigned limit) const
+	{
+		unsigned count = 0;
+		for (ParticleWorld::Particles::iterator p = particles->begin();
+			p != particles->end();
+			p++)
+		{
+			real y = (*p)->getPosition().y;
+			if (y < 0.0f)
+			{
+				Vector3 groundNormal = Vector3::UP;
+				Vector3 velocity = (*p)->getVelocity();
+				real closingVelocity = velocity.scalarProduct(groundNormal);
+
+				/** prevent infinite bouncing */
+				real finalRestitution = restitution;
+				if (std::abs(closingVelocity) < 1.0f)
+				{
+					finalRestitution = 0.0f;
+				}
+
+				contact->contactNormal = groundNormal;
+				contact->particle[0] = *p;
+				contact->particle[1] = NULL;
+				contact->penetration = -y;
+				contact->restitution = finalRestitution;
+				contact++;
+				count++;
+			}
+
+			if (count >= limit) return count;
+		}
+		return count;
+	}
+} // namespace physics

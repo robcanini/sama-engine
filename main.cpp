@@ -1,5 +1,4 @@
 #include <iostream>
-
 #include "core/game_instance.h"
 
 int main()

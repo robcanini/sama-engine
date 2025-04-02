@@ -14,7 +14,7 @@ namespace physics {
 	{
 	public:
 		/** Holds the linear position of the particle in the world space. */
-		Vector3 position;
+		Vector3 position = Vector3::ZERO;
 
 		/** Holds the linear velocity of the particle in the world space. */
 		Vector3 velocity;

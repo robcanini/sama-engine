@@ -33,13 +33,17 @@
 #include "physics/pfreg.h"
 #include "physics/pcontacts.h"
 #include "physics/pworld.h"
+#include "physics/pcommon.h"
 
 namespace core {
 
-    const uint32_t WIDTH = 1440;
-    const uint32_t HEIGHT = 900;
+    const uint32_t WIDTH = 800;
+    const uint32_t HEIGHT = 600;
 
-    const uint32_t PARTICLE_COUNT = 5000;
+    const float HEIGHT_METERS = 0.5f;
+    const float y_bottom = -HEIGHT_METERS / 2.0f;
+
+    const uint32_t PARTICLE_COUNT = 100;
 
     const int MAX_FRAMES_IN_FLIGHT = 2;
 
@@ -82,17 +86,21 @@ namespace core {
 
     class GameInstance
     {
+
+    private:
+        std::vector<physics::Particle*> particles;
+
     public:
         void run() {
+            physics::ParticleWorld* pWorld = generateWorld();
+
             initWindow();
             initVulkan();
-            mainLoop();
+            mainLoop(pWorld);
             cleanup();
         }
 
     private:
-        // std::vector<physics::Particle> cpuParticles;
-
         GLFWwindow* window;
 
         VkInstance instance;
@@ -189,12 +197,10 @@ namespace core {
             createSyncObjects();
         }
 
-        void mainLoop()
+        void mainLoop(physics::ParticleWorld* pWorld)
         {
             const auto frameDuration = std::chrono::duration<double>(1.0 / 60.0); // ~16.6 ms
-
-            physics::ParticleWorld* pWorld = generateWorld();
-
+            
             while (!glfwWindowShouldClose(window))
             {
                 auto frameStart = std::chrono::high_resolution_clock::now();
@@ -205,8 +211,9 @@ namespace core {
                 lastTime = currentTime;
 
                 glfwPollEvents();
-                physicsFrame(lastFrameTime, pWorld);
                 drawFrame();
+
+                physicsFrame(lastFrameTime, pWorld);
 
                 auto frameEnd = std::chrono::high_resolution_clock::now();
                 auto elapsed = frameEnd - frameStart;
@@ -226,45 +233,37 @@ namespace core {
         {
             using namespace physics;
 
-            ParticleWorld* pWorld = new ParticleWorld(10);
+            ParticleWorld* pWorld = new ParticleWorld(PARTICLE_COUNT);
 
             std::default_random_engine rndEngine(static_cast<unsigned>(time(nullptr)));
-            std::uniform_real_distribution<float> rndDist(0.0f, 1.0f);
+            std::uniform_real_distribution<float> xDist(0.0f, static_cast<float>(WIDTH));
+            std::uniform_real_distribution<float> yDist(0.0f, static_cast<float>(HEIGHT));
+            std::uniform_real_distribution<float> rndDist(-1.0f, 1.0f);
+            std::uniform_real_distribution<float> dampingDist(0.500f, 0.999f);
 
-            ParticleWorld::ParticleRegistration* head = nullptr;
-            ParticleWorld::ParticleRegistration* tail = nullptr;
+            ParticleGravity* pfGravity = new ParticleGravity(Vector3::GRAVITY);
 
             for (int i = 0; i < PARTICLE_COUNT; i++)
             {
-                float r = 0.25f * sqrt(rndDist(rndEngine));
-                float theta = rndDist(rndEngine) * 2.0f * 3.14159265358979323846f;
-                float x = r * cos(theta) * HEIGHT / WIDTH;
-                float y = r * sin(theta);
+                float x = rndDist(rndEngine);
+                x -= 0.1f * x;
+                float y = rndDist(rndEngine);
 
                 Particle* particle = new Particle();
-                particle->position = Vector3(x, y, 0);
-                particle->velocity = Vector3(rndDist(rndEngine), rndDist(rndEngine), rndDist(rndEngine));
+                particle->setPosition(Vector3(x, y, 0));
+                particle->velocity = Vector3(0.0f, 0.0f, 0.0f);
                 particle->color = Vector3(rndDist(rndEngine), rndDist(rndEngine), rndDist(rndEngine));
                 particle->acceleration = Vector3(0.0f, 0.0f, 0.0f);
-                particle->damping = std::min(rndDist(rndEngine), 1.0f);
+                particle->damping = dampingDist(rndEngine);
                 particle->setMass(1.0f);
 
-                ParticleWorld::ParticleRegistration* node = new ParticleWorld::ParticleRegistration();
-                node->particle = particle;
-                node->next = nullptr;
-
-                if (!head)
-                {
-                    head = tail = node;
-                }
-                else
-                {
-                    tail->next = node;
-                    tail = node;
-                }
+                pWorld->getParticles().push_back(particle);
+                pWorld->getForceRegistry().add(particle, pfGravity);
+				particles.push_back(particle);
             }
 
-            pWorld->firstParticle = head;
+			GroundContacts* groundContactGen = new GroundContacts(&pWorld->getParticles(), 0.65f);
+			pWorld->getContactGenerators().push_back(groundContactGen);
 
             return pWorld;
         }
@@ -278,24 +277,26 @@ namespace core {
             updateParticlesOnGPU(pWorld);
         }
 
+        void adjustWorldCoordinates(physics::Particle* p)
+        {
+            p->position.y *= -1;
+        }
+
         void updateParticlesOnGPU(physics::ParticleWorld* pWorld)
         {
             using namespace physics;
 
-            std::vector<Particle> particlesVector = {};
+            std::vector<physics::Particle> particleCopies;
+            particleCopies.reserve(particles.size());
 
-            ParticleWorld::ParticleRegistration* current = pWorld->firstParticle;
-
-            while (current)
+            for (auto* p : particles)
             {
-                ParticleWorld::ParticleRegistration* next = current->next;
-
-                particlesVector.push_back(*current->particle);
-
-                current = next;
+                physics::Particle copy = *p;
+                copy.position.y *= -1;
+                particleCopies.push_back(copy);
             }
 
-            VkDeviceSize bufferSize = sizeof(Particle) * PARTICLE_COUNT;
+            VkDeviceSize bufferSize = particleCopies.size() * sizeof(physics::Particle);
 
             VkBuffer stagingBuffer;
             VkDeviceMemory stagingBufferMemory;
@@ -305,7 +306,7 @@ namespace core {
 
             void* data;
             vkMapMemory(device, stagingBufferMemory, 0, bufferSize, 0, &data);
-            memcpy(data, particlesVector.data(), static_cast<size_t>(bufferSize));
+            memcpy(data, particleCopies.data(), static_cast<size_t>(bufferSize));
             vkUnmapMemory(device, stagingBufferMemory);
 
             copyBuffer(stagingBuffer, shaderStorageBuffers[currentFrame], bufferSize);
