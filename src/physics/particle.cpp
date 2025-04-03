@@ -11,7 +11,7 @@ namespace physics {
 		// Update linear position.
 		position.addScaledVector(velocity, duration);
 
-		// Work out the acceleratino from the force.
+		// Work out the acceleration from the force.
 		Vector3 resultingAcc = acceleration;
 		resultingAcc.addScaledVector(forceAccum, inverseMass);
 
