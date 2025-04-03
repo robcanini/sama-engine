@@ -2,6 +2,7 @@
 
 #include "physics/core.h"
 #include "physics/particle.h"
+#include "physics/body.h"
 
 namespace physics {
 

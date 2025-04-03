@@ -12,6 +12,24 @@ namespace physics {
 	const Vector3 Vector3::Z = Vector3(0, 0, 1);
 	const Vector3 Vector3::ZERO = Vector3(0, 0, 0);
 
+    /*
+     * Definition of the sleep epsilon extern.
+     */
+    real sleepEpsilon = ((real)0.3);
+
+    /*
+     * Functions to change sleepEpsilon.
+     */
+    void setSleepEpsilon(real value)
+    {
+        sleepEpsilon = value;
+    }
+
+    real getSleepEpsilon()
+    {
+        return sleepEpsilon;
+    }
+
     real Matrix4::getDeterminant() const
     {
         return -data[8] * data[5] * data[2] +

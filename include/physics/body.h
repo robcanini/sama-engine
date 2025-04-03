@@ -26,6 +26,20 @@ namespace physics {
 		 */
 		Matrix3 inverseInertiaTensor;
 
+		/**
+		 * Holds the amount of damping applied to linear
+		 * motion.  Damping is required to remove energy added
+		 * through numerical instability in the integrator.
+		 */
+		real linearDamping;
+
+		/**
+		 * Holds the amount of damping applied to angular
+		 * motion.  Damping is required to remove energy added
+		 * through numerical instability in the integrator.
+		 */
+		real angularDamping;
+
 		/** Holds the linear position of the rigid body in world space. */
 		Vector3 position;
 
@@ -88,11 +102,24 @@ namespace physics {
 		Vector3 lastFrameAcceleration;
 
 		/**
+		 * Holds the amount of motion of the body. This is a recency
+		 * weighted mean that can be used to put a body to sleap.
+		 */
+		real motion;
+
+		/**
 		 * A body can be put to sleep to avoid it being updated
 		 * by the integration functions or affected by collisions
 		 * with the world.
 		 */
 		bool isAwake;
+
+		/**
+		 * Some bodies may never be allowed to fall asleep.
+		 * User controlled bodies, for example, should be
+		 * always awake.
+		 */
+		bool canSleep;
 
 	public:
 		/**
@@ -103,6 +130,14 @@ namespace physics {
 		 * (such as the transform matrix), then you can omit this step.
 		 */
 		void calculateDerivedData();
+
+		/**
+		 * Integrates the rigid body forward in time by the given amount.
+		 * This function uses a Newton-Euler integration method, which is a
+		 * linear approximation to the correct integral. For this reason it
+		 * may be inaccurate in some cases.
+		 */
+		void integrate(real duration);
 
 		void setInertiaTensor(const Matrix3& inertiaTensor);
 
@@ -160,6 +195,134 @@ namespace physics {
 		Matrix4 getTransform() const;
 
 		/**
+		 * Sets the velocity of the rigid body.
+		 *
+		 * @param velocity The new velocity of the rigid body. The
+		 * velocity is given in world space.
+		 */
+		void setVelocity(const Vector3& velocity);
+
+		/**
+		 * Sets the velocity of the rigid body by component. The
+		 * velocity is given in world space.
+		 *
+		 * @param x The x coordinate of the new velocity of the rigid
+		 * body.
+		 *
+		 * @param y The y coordinate of the new velocity of the rigid
+		 * body.
+		 *
+		 * @param z The z coordinate of the new velocity of the rigid
+		 * body.
+		 */
+		void setVelocity(const real x, const real y, const real z);
+
+		/**
+		 * Fills the given vector with the velocity of the rigid body.
+		 *
+		 * @param velocity A pointer to a vector into which to write
+		 * the velocity. The velocity is given in world local space.
+		 */
+		void getVelocity(Vector3* velocity) const;
+
+		/**
+		 * Gets the velocity of the rigid body.
+		 *
+		 * @return The velocity of the rigid body. The velocity is
+		 * given in world local space.
+		 */
+		Vector3 getVelocity() const;
+
+		/**
+		 * Applies the given change in velocity.
+		 */
+		void addVelocity(const Vector3& deltaVelocity);
+
+		/**
+		 * Sets the rotation of the rigid body.
+		 *
+		 * @param rotation The new rotation of the rigid body. The
+		 * rotation is given in world space.
+		 */
+		void setRotation(const Vector3& rotation);
+
+		/**
+		 * Sets the rotation of the rigid body by component. The
+		 * rotation is given in world space.
+		 *
+		 * @param x The x coordinate of the new rotation of the rigid
+		 * body.
+		 *
+		 * @param y The y coordinate of the new rotation of the rigid
+		 * body.
+		 *
+		 * @param z The z coordinate of the new rotation of the rigid
+		 * body.
+		 */
+		void setRotation(const real x, const real y, const real z);
+
+		/**
+		 * Fills the given vector with the rotation of the rigid body.
+		 *
+		 * @param rotation A pointer to a vector into which to write
+		 * the rotation. The rotation is given in world local space.
+		 */
+		void getRotation(Vector3* rotation) const;
+
+		/**
+		 * Gets the rotation of the rigid body.
+		 *
+		 * @return The rotation of the rigid body. The rotation is
+		 * given in world local space.
+		 */
+		Vector3 getRotation() const;
+
+		/**
+		 * Applies the given change in rotation.
+		 */
+		void addRotation(const Vector3& deltaRotation);
+
+		/**
+		 * Returns true if the body is awake and responding to
+		 * integration.
+		 *
+		 * @return The awake state of the body.
+		 */
+		bool getAwake() const
+		{
+			return isAwake;
+		}
+
+		/**
+		 * Sets the awake state of the body. If the body is set to be
+		 * not awake, then its velocities are also cancelled, since
+		 * a moving body that is not awake can cause problems in the
+		 * simulation.
+		 *
+		 * @param awake The new awake state of the body.
+		 */
+		void setAwake(const bool awake = true);
+
+		/**
+		 * Returns true if the body is allowed to go to sleep at
+		 * any time.
+		 */
+		bool getCanSleep() const
+		{
+			return canSleep;
+		}
+
+		/**
+		 * Sets whether the body is ever allowed to go to sleep. Bodies
+		 * under the player's control, or for which the set of
+		 * transient forces applied each frame are not predictable,
+		 * should be kept awake.
+		 *
+		 * @param canSleep Whether the body can now be put to sleep.
+		 */
+		void setCanSleep(const bool canSleep = true);
+
+		/**
 		 * Converts the given point from world space into the body's
 		 * local space.
 		 *
@@ -206,6 +369,101 @@ namespace physics {
 		 * @return The converted direction, in world space.
 		 */
 		Vector3 getDirectionInWorldSpace(const Vector3& direction) const;
+
+		/**
+		 * Sets the mass of the rigid body.
+		 *
+		 * @param mass The new mass of the body. This may not be zero.
+		 * Small masses can produce unstable rigid bodies under
+		 * simulation.
+		 *
+		 * @warning This invalidates internal data for the rigid body.
+		 * Either an integration function, or the calculateInternals
+		 * function should be called before trying to get any settings
+		 * from the rigid body.
+		 */
+		void setMass(const real mass);
+
+		/**
+		 * Gets the mass of the rigid body.
+		 *
+		 * @return The current mass of the rigid body.
+		 */
+		real getMass() const;
+
+		/**
+		 * Sets the inverse mass of the rigid body.
+		 *
+		 * @param inverseMass The new inverse mass of the body. This
+		 * may be zero, for a body with infinite mass
+		 * (i.e. unmovable).
+		 *
+		 * @warning This invalidates internal data for the rigid body.
+		 * Either an integration function, or the calculateInternals
+		 * function should be called before trying to get any settings
+		 * from the rigid body.
+		 */
+		void setInverseMass(const real inverseMass);
+
+		/**
+		 * Gets the inverse mass of the rigid body.
+		 *
+		 * @return The current inverse mass of the rigid body.
+		 */
+		real getInverseMass() const;
+
+		/**
+		 * Returns true if the mass of the body is not-infinite.
+		 */
+		bool hasFiniteMass() const;
+
+		/**
+		 * Sets both linear and angular damping in one function call.
+		 *
+		 * @param linearDamping The speed that velocity is shed from
+		 * the rigid body.
+		 *
+		 * @param angularDamping The speed that rotation is shed from
+		 * the rigid body.
+		 *
+		 * @see setLinearDamping
+		 * @see setAngularDamping
+		 */
+		void setDamping(const real linearDamping, const real angularDamping);
+
+		/**
+		 * Sets the linear damping for the rigid body.
+		 *
+		 * @param linearDamping The speed that velocity is shed from
+		 * the rigid body.
+		 *
+		 * @see setAngularDamping
+		 */
+		void setLinearDamping(const real linearDamping);
+
+		/**
+		 * Gets the current linear damping value.
+		 *
+		 * @return The current linear damping value.
+		 */
+		real getLinearDamping() const;
+
+		/**
+		 * Sets the angular damping for the rigid body.
+		 *
+		 * @param angularDamping The speed that rotation is shed from
+		 * the rigid body.
+		 *
+		 * @see setLinearDamping
+		 */
+		void setAngularDamping(const real angularDamping);
+
+		/**
+		 * Gets the current angular damping value.
+		 *
+		 * @return The current angular damping value.
+		 */
+		real getAngularDamping() const;
 	};
 
 } // namespace physics
