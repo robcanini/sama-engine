@@ -158,7 +158,7 @@ namespace core {
 
             glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 
-            window = glfwCreateWindow(WIDTH, HEIGHT, "Vulkan", nullptr, nullptr);
+            window = glfwCreateWindow(WIDTH, HEIGHT, "Sama Engine", nullptr, nullptr);
             glfwSetWindowUserPointer(window, this);
             glfwSetFramebufferSizeCallback(window, framebufferResizeCallback);
 
